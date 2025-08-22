@@ -3,6 +3,7 @@ API client for Open Notebook API.
 This module provides a client interface to interact with the Open Notebook API.
 """
 
+import json
 import os
 from dotenv import load_dotenv
 from fastapi import responses
@@ -58,7 +59,18 @@ class APIClient:
             except Exception as e:
                 logger.error(f"Unexpected error for {method} {url}: {str(e)}")
                 raise
-
+    # Notebooks API methods
     def get_notebook(
-        sefl, archived: Optional[bool] = None, order_by: str = "update desc"
-    )
+        self, archived: Optional[bool] = None, order_by: str = "update desc"
+    )-> List[Dict]:
+        """Get all notebooks."""
+        params = {"order_by": order_by}
+        if archived is not None:
+            params = ["archived"]= archived
+
+        return self._make_request("GET", "/api/notebooks", params = params)
+
+    def create_notebook(self, name: str, description: str = "")-> Dict:
+        """Create a new notebook."""
+        data = {"name": name, "description": description}
+        return self._make_request("POST","/api/notebooks", json=data)
